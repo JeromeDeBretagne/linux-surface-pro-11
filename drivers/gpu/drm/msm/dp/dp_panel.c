@@ -58,6 +58,15 @@ static int msm_dp_panel_read_dpcd(struct msm_dp_panel *msm_dp_panel)
 	if (rc)
 		return rc;
 
+	/*
+	 * HACK: for some reason the ATNA30DW01-1 OLED panel in the Surface Pro 11
+	 * reports a max link rate of 0 in the DPCD - fix it to match the
+	 * EDPOverrideDPCDCaps string found in the ACPI DSDT
+	 */
+	if (dpcd[DP_MAX_LINK_RATE] == 0) {
+		dpcd[1] = DP_LINK_BW_8_1;
+	}
+
 	msm_dp_panel->vsc_sdp_supported = drm_dp_vsc_sdp_supported(panel->aux, dpcd);
 	link_info = &msm_dp_panel->link_info;
 	link_info->revision = dpcd[DP_DPCD_REV];
